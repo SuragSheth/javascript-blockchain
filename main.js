@@ -4,13 +4,9 @@ const SHA256 = require('crypto-js/sha256')
 class Block {
 
   // When a block is created it takes in a timestamp and blockdata
-  constructor(timestamp, data) {
-    // Where the chain is located
-    this.index = 0;
-
+  constructor(timestamp, transactions, previousHash='') {
     this.timestamp = timestamp;
-    this.data = data;
-
+    this.transactions = transactions;
     // Maintains the integrity of the chain
     this.previousHash = "0";
     this.hash = this.calculateHash();
@@ -19,27 +15,64 @@ class Block {
   }
 
   calculateHash(){
-    // takes in every piece of the blocks data, so if anything is tampered with the has will be immediately different
-    return SHA256(this.index + this.previousHash + this.timestamp, + this.data + this.nonce).toString();
+    // Takes in every piece of the blocks data, so if anything is tampered with the has will be immediately different
+    return SHA256(this.previousHash + this.timestamp, + JSON.stringify(this.transactions) + this.nonce).toString();
   }
 
-  mineBlock(difficulty){
+  mineBlock(difficulty) {
+        while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")) {
+            this.nonce++;
+            this.hash = this.calculateHash();
+        }
 
-  }
+        console.log("BLOCK MINED: " + this.hash);
+    }
 }
 
 class Blockchain {
   constructor(){
-    // create the first block on instantiation and add to the chain
+    // Create the first block on instantiation and add to the chain
     this.chain = [this.createGenesis()];
+    // this.nodes = [+genesisNode];
+    this.difficulty = 1;
+    this.pendingTransactions =[];
+    this.minigReward = 100;
+  }
+
+  registerNode(port) {
+    if (!this.nodes.includes(port)){
+      this.nodes.push(port);
+      // Implement gossiping to share info on new nodes constantly
+    }
+  }
+
+  retrieveNodes(){
+    return this.nodes;
   }
 
   createGenesis() {
-    return new Block(0, new Date(), "http://theden.io/", "0");
+    return new Block(Date.parse("2017-01-01"), [], "0");
+  }
+
+  minePendingTransactions(minigRewardAddress){
+    let block = new Block(Date.now(), this.pendingTransactions, this.latestBlock().hash);
+    block.mineBlock(this.difficulty);
+
+    console.log("Block Successfully Mined!");
+    this.chain.push(block);
+
+    this.pendingTransactions = [
+     new Transaction(null, miningRewardAddress, this.miningReward)
+    ];
+  }
+
+  createTransaction(transaction){
+    // Add transaction that we want to add to the block
+    this.pendingTransactions.push(transaction);
   }
 
   latestBlock(){
-    // get information about the latest block
+    // Get information about the latest block
     return this.chain[this.chain.length -1];
   }
 
@@ -50,17 +83,17 @@ class Blockchain {
   }
 
   checkValid(){
-    // check the integrity of the blockchain and detect whether or not anything has been tampered with
+    // Check the integrity of the blockchain and detect whether or not anything has been tampered with
     for(let i = 1; i < this.chain.length; i++){
       const currentBlock = this.chain[i];
       const previousBlock = this.chain[i -1];
 
-      // check if hash is valid perdata
+      // Check if hash is valid perdata
       if (currentBlock.hash !== currentBlock.calculateHash()){
         return false;
       }
 
-      // check if previous block hash is valid
+      // Check if previous block hash is valid
       if (currentBlock.previousHash !== previousBlock.hash){
         return false
       }
@@ -70,9 +103,31 @@ class Blockchain {
   }
 }
 
-let jsChain = new Blockchain();
-jsChain.addBlock(new Block("12/25/2017", {amount: 5}));
-jsChain.addBlock(new Block("12/26/2017", {amount: 10}));
 
-console.log(JSON.stringify(jsChain, null, 4));
-console.log("Is blockchain valid? " + jsChain.checkValid());
+
+// Add new transactions to blockchain
+// @param {string} fromAddress
+// @param {string} toAddress
+// @param {int} amount
+class Transaction {
+  constructor(fromAddress, toAddress, amount){
+    this.fromAddress = fromAddress;
+    this.toAddress = toAddress;
+    this.amount = amount;
+  }
+}
+
+
+
+let DENCHAIN = new Blockchain();
+DENCHAIN.createTransaction(new Transaction("1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2", "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy", 100));
+DENCHAIN.createTransaction(new Transaction("1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2", "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy", 223));
+DENCHAIN.createTransaction(new Transaction("1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2", "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy", 112));
+
+console.log('\n Starting the miner...');
+DENCHAIN.minePendingTransactions('1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2');
+
+DENCHAIN.addBlock(new Block(new Date(), {amount: 5}));
+DENCHAIN.addBlock(new Block(new Date(), {amount: 10}));
+console.log(JSON.stringify(DENCHAIN, null, 4));
+console.log("Is blockchain valid? " + DENCHAIN.checkValid());
