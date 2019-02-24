@@ -109,6 +109,8 @@ class Blockchain {
       const currentBlock = this.chain[i];
       const previousBlock = this.chain[i -1];
 
+      console.log(currentBlock.previousHash, previousBlock.hash);
+
       // Check if hash is valid perdata
       if (currentBlock.hash !== currentBlock.calculateHash()){
         return false;
@@ -151,6 +153,6 @@ DENCHAIN.minePendingTransactions('1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2');
 DENCHAIN.addBlock(new Block(new Date(), {amount: 5}));
 DENCHAIN.addBlock(new Block(new Date(), {amount: 10}));
 console.log(JSON.stringify(DENCHAIN, null, 4));
-console.log("Is blockchain valid? " + DENCHAIN.checkValid());
+console.log("Is blockchain valid? ", DENCHAIN.checkValid());
 
 // console.log("my balance", DENCHAIN.getBalanceOfAddress("3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy"));
