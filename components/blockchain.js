@@ -1,21 +1,17 @@
-const SHA256 = require('crypto-js/sha256');
-const Block = require ('./block.js');
+const SHA256 = require('crypto-js/sha256'),
+      Block = require('./block.js'),
+      Level_DB = require('./leveldb.js');
 
-class Blockchain {
+module.exports = class Blockchain {
 
   constructor(){
     // Create the first block on instantiation and add to the chain
-    this.chain = [this.createGenesis()];
+    this.chain = [];
     // this.nodes = [+genesisNode];
     this.difficulty = 1;
+    this.height = 0,
     this.pendingTransactions =[];
     this.minigReward = 100;
-
-    // Binding of this
-    this.newBlock = this.newBlock.bind(this);
-    this.newTransaction = this.newTransaction.bind(this);
-    this.latestBlock = this.latestBlock.bind(this);
-    this.proofOfWork = this.proofOfWork.bind(this);
   }
 
   returnChain() {
@@ -23,7 +19,10 @@ class Blockchain {
   }
   // Create the genisis, or first block of the blockchain
   createGenesis() {
-    return new Block(Date.parse("2017-01-01"), [], "0");
+    let block = new Block(Date.parse("2017-01-01"), [], "0");
+    this.chain.push(block);
+    Level_DB.addLevelDBData(this.height, JSON.stringify(block));
+    return block;
   }
 
   // Add transaction that we want to add into to the block
@@ -80,8 +79,10 @@ class Blockchain {
   }
 
   addBlock(newBlock) {
+    console.log("add block", newBlock)
     newBlock.previousHash = this.latestBlock().hash;
     newBlock.hash = newBlock.calculateHash();
+    this.height++;
     this.chain.push(newBlock);
   }
 
@@ -101,17 +102,5 @@ class Blockchain {
       }
     }
     return true;
-  }
-}
-
-// Add new transactions to blockchain
-// @param {string} fromAddress
-// @param {string} toAddress
-// @param {int} amount
-class Transaction {
-  constructor(fromAddress, toAddress, amount){
-    this.fromAddress = fromAddress;
-    this.toAddress = toAddress;
-    this.amount = amount;
   }
 }
