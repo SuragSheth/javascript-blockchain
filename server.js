@@ -1,19 +1,19 @@
 const express = require('express');
 const routes = require('./config/routes');
-
+const bodyParser = require('body-parser');
 // =============================================================================
-// Server Configuation
+// Server Configuration
 // =============================================================================
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// app.use(express.static(`${__dirname}/dist`));
-// app.set('view engine', 'ejs');
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 // =============================================================================
 // Routing
 // =============================================================================
 app.use('/', routes);
+require('./config/test');
 
 // =============================================================================
 // Start Server

@@ -1,38 +1,41 @@
 const express = require('express');
       router = express.Router(),
-      Blockchain = require('../blockchain.js'),
-      DEN_CHAIN = new Blockchain();
+      Blockchain = require('../components/blockchain'),
+      BabyBitcoin = new Blockchain();
 
 router.get('/', (req, res) => {
+  res.send("Welcome to the Decentralized Education Nexus");
 });
 
-router.get('/transactions/new', (req, res) => {
-  DEN_CHAIN.createTransaction(req.body);
+// Return the latest block on our blockchain 
+router.get('/blockchain/latest_block', (req, res) => {
+  BabyBitcoin.latestBlock();
 });
 
-router.get('/mine', (req, res) => {
-  DEN_CHAIN.minePendingTransactions('1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2');
+// Return all of the data on our blockchain
+router.get('/blockchain/all', (req, res) => {
+  BabyBitcoin.returnChain();
 });
 
-router.get('/chain', (req, res) => {
-  DEN_CHAIN.returnChain();
+// Individuals are are able to submit transactions into the chain
+router.get('/transaction', (req, res) => {
+  BabyBitcoin.createTransaction(req.body.amount, req.body.sender, req.body.recipient);
 });
+
+
+
+
+
+
+
+// router.get('/transactions/new', (req, res) => {
+//   BabyBitcoin.createTransaction(req.body);
+// });
+
 
 router.get('*', function(req, res){
   res.JSON({message: "This is not a valid API Request"});
-})
+});
+
 module.exports = router;
 
-// let DENCHAIN = new Blockchain();
-// DENCHAIN.createTransaction(new Transaction("1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2", "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy", 100));
-// DENCHAIN.createTransaction(new Transaction("1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2", "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy", 223));
-// DENCHAIN.createTransaction(new Transaction("1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2", "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy", 112));
-//
-// console.log('\n Starting the miner...');
-// DENCHAIN.minePendingTransactions('1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2');
-//
-// DENCHAIN.addBlock(new Block(new Date(), {amount: 5}));
-// DENCHAIN.addBlock(new Block(new Date(), {amount: 10}));
-//
-// console.log(JSON.stringify(DENCHAIN, null, 4));
-// console.log("Is blockchain valid? " + DENCHAIN.checkValid());

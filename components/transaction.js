@@ -1,11 +1,10 @@
-// Add new transactions to blockchain
-// @param {string} fromAddress
-// @param {string} toAddress
-// @param {int} amount
-class Transaction {
-  constructor(fromAddress, toAddress, amount){
-    this.fromAddress = fromAddress;
-    this.toAddress = toAddress;
-    this.amount = amount;
-  }
+function Transaction(amount, fromAddress, toAddress, transactionId) {
+  this.amount = amount;
+  this.sender = fromAddress;
+  this.recipient = toAddress;
+  this.transactionId = transactionId;
+  console.log('this transaction: ', this);
+  return this;
 }
+
+module.exports = Transaction;
